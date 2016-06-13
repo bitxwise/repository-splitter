@@ -9,7 +9,7 @@ namespace RepositorySplitter
     /// <remarks>
     /// This approach to executing git operations may be a bit ugly. Consider refactoring later.
     /// </remarks>
-    public class GitCommand
+    public class GitCommand : IRepositoryCommand
     {
         /// <summary>
         /// Name of the git executable.

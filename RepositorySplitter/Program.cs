@@ -19,9 +19,11 @@ namespace RepositorySplitter
                 Console.WriteLine(e.ResultMessage);
             };
 
+            WindowsDirectoryHelper directoryHelper = new WindowsDirectoryHelper();
+
             // prepare split strategy
             // TODO: Use factory as new strategies are added
-            SpecifiedDirectoriesSplitStrategy splitStrategy = new SpecifiedDirectoriesSplitStrategy(git);
+            SpecifiedDirectoriesSplitStrategy splitStrategy = new SpecifiedDirectoriesSplitStrategy(git, directoryHelper);
             
             splitStrategy.SplitRepositoryName = options.SplitRepositoryName;
             splitStrategy.Directories = options.Directories.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
