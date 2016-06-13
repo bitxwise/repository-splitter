@@ -20,8 +20,8 @@ namespace RepositorySplitter
         [Option("srepo", Required = true, HelpText = "The name of the new repository that results from the splitting.")]
         public string SplitRepositoryName { get; set; }
 
-        [Option("directories", Required = true, HelpText = "Names of directories to include in the new repository, separated by a space. Directories are expected to be relative paths from the repository root.")]
-        public string SubDirectories { get; set; }
+        [Option(Required = true, HelpText = "Names of directories to include in the new repository, separated by a space. Directories are expected to be relative paths from the repository root.")]
+        public string Directories { get; set; }
 
         /// <summary>
         /// Gets the usage for repository splitter options.

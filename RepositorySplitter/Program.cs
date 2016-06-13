@@ -22,8 +22,9 @@ namespace RepositorySplitter
             // prepare split strategy
             // TODO: Use factory as new strategies are added
             SpecifiedDirectoriesSplitStrategy splitStrategy = new SpecifiedDirectoriesSplitStrategy(git);
+            
             splitStrategy.SplitRepositoryName = options.SplitRepositoryName;
-            splitStrategy.Directories = options.SubDirectories.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            splitStrategy.Directories = options.Directories.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             try
             {
