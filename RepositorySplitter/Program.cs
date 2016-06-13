@@ -9,17 +9,11 @@ namespace RepositorySplitter
         static void Main(string[] args)
         {
             // parse specified arguments
-            bool optionsReady = true;
             var options = new Options();
-            Parser parser = new Parser();
-            parser.ParseArgumentsStrict(args, options, () => {
-                Console.WriteLine(options.GetUsage());
-                optionsReady = false;
-            });
-
-            if (!optionsReady)
+            
+            if(!Parser.Default.ParseArgumentsStrict(args, options))
                 return;
-
+            
             GitCommand git = new GitCommand();
             git.NewResultMessage += (s, e) => {
                 Console.WriteLine(e.ResultMessage);

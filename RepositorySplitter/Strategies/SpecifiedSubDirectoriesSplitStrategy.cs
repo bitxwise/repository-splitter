@@ -82,6 +82,8 @@ namespace RepositorySplitter
             var allSubDirectories = Directory.GetDirectories(newRepository)
                 .Select(d => DirectoryHelper.GetRelativePath(newRepository, d).TrimEnd(Path.DirectorySeparatorChar));
 
+            // TODO: Support recursive directory search. May need to change meaning of -r. Otherwise, src/NightRays is not preserved with db/ and src/ as subdirectories of newRepo
+
             List<string> subDirectoriesToRemove = new List<String>(allSubDirectories);
             foreach(string subdirectory in SubDirectories)
                 subDirectoriesToRemove.Remove(subdirectory);
