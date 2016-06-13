@@ -49,7 +49,7 @@
     <Compile Include="LinqExtensions.cs" />
     <Compile Include="ResultMessageEventArgs.cs" />
     <Compile Include="Options.cs" />
-    <Compile Include="Strategies\SpecifiedSubDirectoriesSplitStrategy.cs" />
+    <Compile Include="Strategies\SpecifiedDirectoriesSplitStrategy.cs" />
     <Compile Include="GitCommand.cs" />
     <Compile Include="Strategies\ISplitStrategy.cs" />
     <Compile Include="Program.cs" />

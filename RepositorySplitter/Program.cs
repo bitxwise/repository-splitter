@@ -11,7 +11,7 @@ namespace RepositorySplitter
             // parse specified arguments
             var options = new Options();
             
-            if(!Parser.Default.ParseArgumentsStrict(args, options))
+            if(!Parser.Default.ParseArguments(args, options))
                 return;
             
             GitCommand git = new GitCommand();
@@ -21,9 +21,9 @@ namespace RepositorySplitter
 
             // prepare split strategy
             // TODO: Use factory as new strategies are added
-            SpecifiedSubDirectoriesSplitStrategy splitStrategy = new SpecifiedSubDirectoriesSplitStrategy(git);
+            SpecifiedDirectoriesSplitStrategy splitStrategy = new SpecifiedDirectoriesSplitStrategy(git);
             splitStrategy.SplitRepositoryName = options.SplitRepositoryName;
-            splitStrategy.SubDirectories = options.SubDirectories.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            splitStrategy.Directories = options.SubDirectories.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             try
             {

@@ -11,13 +11,16 @@ namespace RepositorySplitter
 {
     public class Options
     {
-        [Option('r', "repo", Required = true, HelpText = "Directory path for the repository to split.")]
+        [Option(HelpText="Whether to recursively search repository directories")]
+        public bool Recursive { get; set; }
+
+        [Option("repo", Required = true, HelpText = "Directory path for the repository to split.")]
         public string Repository { get; set; }
 
-        [Option('s', "srepo", Required = true, HelpText = "The name of the new repository that results from the splitting.")]
+        [Option("srepo", Required = true, HelpText = "The name of the new repository that results from the splitting.")]
         public string SplitRepositoryName { get; set; }
 
-        [Option('d', "dir", Required = true, HelpText = "Names of subdirectories to include in the new repository, separated by a space. Subdirectories are expected to be relative paths from the repository root.")]
+        [Option("directories", Required = true, HelpText = "Names of directories to include in the new repository, separated by a space. Directories are expected to be relative paths from the repository root.")]
         public string SubDirectories { get; set; }
 
         /// <summary>
