@@ -14,13 +14,17 @@ At this time, the target repository is not changed.
 ```
 RepositorySplitter.exe
 
--r, --repo     Required. Directory path for the repository to split.
+-r                  Required. Directory path for the repository to split.
 
--s, --srepo    Required. The name of the new repository that results from the
-               splitting.
+-s                  Required. The name of the new repository that results
+                    from the splitting.
 
--d, --dir      Required. Names of subdirectories to include in the new
-               repository, separated by a space.
+-d                  Required. Names of directories to include in the new
+                    repository, separated by a space. Directories are
+                    expected to be relative paths from the repository root.
+
+--subdirectories    Whether the directories to include are at the subdirectory
+                    level.
 ```
 
 #### Example

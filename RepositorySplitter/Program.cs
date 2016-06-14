@@ -11,7 +11,7 @@ namespace RepositorySplitter
             // parse specified arguments
             var options = new Options();
             
-            if(!Parser.Default.ParseArguments(args, options))
+            if(!Parser.Default.ParseArgumentsStrict(args, options))
                 return;
             
             GitCommand git = new GitCommand();
