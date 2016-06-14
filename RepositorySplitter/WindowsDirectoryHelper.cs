@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace RepositorySplitter
 {
@@ -9,16 +10,6 @@ namespace RepositorySplitter
     /// </summary>
     public class WindowsDirectoryHelper : IDirectoryHelper
     {
-        /// <summary>
-        /// Gets the repository directories at the specified path.
-        /// </summary>
-        /// <param name="path">The directory path at which to get repository directories.</param>
-        /// <returns>A collection of repository directories located at the specified path.</returns>
-        public IEnumerable<string> GetDirectories(string path)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// Gets the names of the subdirectories (including their paths) that match the
         /// specified search pattern in the current directory, and optionally searches
@@ -41,7 +32,12 @@ namespace RepositorySplitter
         /// </returns>
         public IEnumerable<string> GetDirectories(string path, string searchPattern, SearchOption searchOption)
         {
-            throw new NotImplementedException();
+            // get relative paths for each directory
+            var directories = Directory.GetDirectories(path, searchPattern, searchOption);
+            for (int i = 0; i < directories.Length; i++)
+                directories[i] = GetRelativePath(path, directories[i]);
+
+            return directories;
         }
 
         /// <summary>
@@ -54,7 +50,7 @@ namespace RepositorySplitter
         /// <exception cref="UriFormatException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
         /// <remarks>
-        /// Credit: http://stackoverflow.com/questions/275689/how-to-get-relative-path-from-absolute-path/32113484#32113484
+        /// Credit: Adjusted from http://stackoverflow.com/questions/275689/how-to-get-relative-path-from-absolute-path/32113484#32113484
         /// </remarks>
         public string GetRelativePath(string fromPath, string toPath)
         {
@@ -72,11 +68,8 @@ namespace RepositorySplitter
 
             Uri relativeUri = fromUri.MakeRelativeUri(toUri);
             string relativePath = Uri.UnescapeDataString(relativeUri.ToString());
-
-            if (string.Equals(toUri.Scheme, Uri.UriSchemeFile, StringComparison.OrdinalIgnoreCase))
-                relativePath = relativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
             
-            return relativePath;
+            return relativePath.TrimEnd(Path.AltDirectorySeparatorChar);
         }
 
         /// <summary>
@@ -98,8 +91,8 @@ namespace RepositorySplitter
         public string AppendDirectorySeparatorChar(string path, bool force)
         {
             // Append a slash only if the path is a directory and does not have a slash
-            if ((force || !Path.HasExtension(path)) && !path.EndsWith(Path.DirectorySeparatorChar.ToString()))
-                return path + Path.DirectorySeparatorChar;
+            if ((force || !Path.HasExtension(path)) && !path.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
+                return path + Path.AltDirectorySeparatorChar;
 
             return path;
         }
