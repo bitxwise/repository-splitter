@@ -26,7 +26,7 @@ namespace RepositorySplitter
             SpecifiedDirectoriesSplitStrategy splitStrategy = new SpecifiedDirectoriesSplitStrategy(git, directoryHelper);
             
             splitStrategy.SplitRepositoryName = options.SplitRepositoryName;
-            splitStrategy.Directories = options.Directories.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            splitStrategy.DirectoriesToRetain = options.Directories.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             try
             {

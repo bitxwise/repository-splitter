@@ -12,12 +12,18 @@ namespace RepositorySplitter.Tests
     [TestClass()]
     public class DirectoryTests
     {
+        /// <summary>
+        /// A test to verify that the determination of which directories to remove correctly includes directories
+        /// that are not flagged for retainment, and also excludes git directories. Parent directories of subdirectories
+        /// to retain should also be excluded from removal.
+        /// </summary>
         [TestMethod(), TestCategory("Directory Tests")]
-        public void DirectoryRecursionTest()
+        public void GetDirectoriesToRemoveTest()
         {
             /***** ARRANGE *****/
             var directoryHelper = Substitute.For<IDirectoryHelper>();
             var target = new SpecifiedDirectoriesSplitStrategy(Substitute.For<IRepositoryCommand>(), directoryHelper);
+            target.IncludeSubdirectories = true;
 
             string newRepository = "newRepo";
 
@@ -34,18 +40,36 @@ namespace RepositorySplitter.Tests
                 "foo/blah"
             };
 
-            target.Directories = directoriesToRetain;
+            var inexplicitParentDirectories = new string[] {
+                "abc",
+                "foo"
+            };
+
+            var gitDirectories = new string[] {
+                ".git",
+                ".git/hooks",
+                ".git/logs",
+                ".git/objects",
+                ".git/refs"
+            };
+
+            target.DirectoriesToRetain = directoriesToRetain;
             
             directoryHelper.GetDirectories(newRepository, "*", SearchOption.AllDirectories).Returns(
-                // assume directories are returned in alphabetical order
-                directoriesToRetain.Concat(expected).OrderBy(d => d)
+                // assume directories are returned in order of hierarchy, then by alphabetical order
+                directoriesToRetain
+                    .Concat(expected)
+                    .Concat(gitDirectories)
+                    .Concat(inexplicitParentDirectories)
+                    .OrderBy(d => d.Count(di => di == '/')) // order by hierarchy
+                    .ThenBy(d => d)                         // then by alphabetical order
             );
 
             /***** ACT *****/
             var actual = target.GetDirectoriesToRemove(newRepository);
 
             /***** ASSERT *****/
-            Assert.AreEqual(expected, actual);
+            CollectionAssert.AreEquivalent(expected.ToArray(), actual.ToArray());
         }
     }
 }

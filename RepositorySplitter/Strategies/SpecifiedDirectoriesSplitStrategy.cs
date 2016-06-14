@@ -24,7 +24,7 @@ namespace RepositorySplitter
         /// <summary>
         /// Gets or sets names of directories to include in the new repository.
         /// </summary>
-        public IEnumerable<string> Directories { get; set; }
+        public IEnumerable<string> DirectoriesToRetain { get; set; }
 
         private readonly IRepositoryCommand _Git;
         /// <summary>
@@ -39,9 +39,9 @@ namespace RepositorySplitter
         }
 
         /// <summary>
-        /// Whether to search directories recursively when filtering content and history.
+        /// Whether to include subdirectories when filtering content and history.
         /// </summary>
-        public bool SplitRecursively { get; set; }
+        public bool IncludeSubdirectories { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the new repository that results from the splitting.
@@ -75,7 +75,7 @@ namespace RepositorySplitter
                 throw new Exception("The new repository name is invalid.");
 
             // verify we know which directories to split into the new repository
-            if (Directories == null || Directories.Count() == 0)
+            if (DirectoriesToRetain == null || DirectoriesToRetain.Count() == 0)
                 throw new Exception("No directories will be included in the new repository.");
 
             string parentDirectory = Directory.GetParent(repository).FullName;
@@ -114,20 +114,34 @@ namespace RepositorySplitter
             // TODO: Support removal of directories that were split into new repository from original repository
         }
 
+        /// <summary>
+        /// Gets the directories, including subdirectories if IncludeSubdirectories is true, to remove from the new repository.
+        /// </summary>
+        /// <param name="newRepository">The path to the new repository.</param>
+        /// <returns></returns>
         public IEnumerable<string> GetDirectoriesToRemove(string newRepository)
         {
-            //List<string> directories = new List<string>(DirectoryHelper.GetDirectories(newRepository));
+            // add parent directories to ensure those are not removed
+            // TODO: Refactor this into a directory helper
+            var allDirectoriesToRetain = new List<string>(DirectoriesToRetain);
+            foreach (var directory in DirectoriesToRetain)
+            {
+                string path;
+                int index = directory.LastIndexOf(Path.AltDirectorySeparatorChar);
+                while(index > 0)
+                {
+                    path = directory.Substring(0, index);
+                    if(!allDirectoriesToRetain.Contains(path)) allDirectoriesToRetain.Add(path);
+                    index = path.LastIndexOf(Path.AltDirectorySeparatorChar);
+                }
+            }
 
-            //foreach(var directory in directories)
-            //    directory.Name = DirectoryHelper.GetRelativePath(newRepository, directory.ToString()).TrimEnd(Path.DirectorySeparatorChar);
-
-            //// do not allow removal of .git folder
-            //directories.RemoveAll(d => d.Name.Equals(".git"));
-
-            //foreach (var directory in Directories)
-            //    directories.RemoveAll(d => d.ToString().Equals(directory));
+            // get all directories for removal, and exclude git directories, as well as directories to retain
+            var directories = new List<string>(DirectoryHelper.GetDirectories(newRepository, "*", IncludeSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly));
+            directories.RemoveAll(d => d.StartsWith(".git"));   // always retain git directories
+            directories.RemoveAll(d => allDirectoriesToRetain.Contains(d));
             
-            return null;
+            return directories;
         }
     }
 }
