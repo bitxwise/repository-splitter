@@ -66,6 +66,7 @@ namespace RepositorySplitter
         public void Split(string repository)
         {
             #region Pre-Verifications
+            // TODO: Consider moving these into directory helper
             // verify repository directory exists
             if (!Directory.Exists(repository))
                 throw new DirectoryNotFoundException(repository);
@@ -121,25 +122,51 @@ namespace RepositorySplitter
         /// <returns></returns>
         public IEnumerable<string> GetDirectoriesToRemove(string newRepository)
         {
-            // add parent directories to ensure those are not removed
+            // get all directories for removal, and exclude git directories, as well as directories (and their subdirectories) to retain
+            var directories = new List<string>(DirectoryHelper.GetDirectories(newRepository, "*", true ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly));
+            directories.RemoveAll(d => d.StartsWith(".git"));   // always retain git directories
+            directories.RemoveAll(d => DirectoriesToRetain.Any(dtr => d == dtr || d.StartsWith(dtr + Path.AltDirectorySeparatorChar)));
+
+            // ensure parent directories for directories to retain are also retained
             // TODO: Refactor this into a directory helper
-            var allDirectoriesToRetain = new List<string>(DirectoriesToRetain);
             foreach (var directory in DirectoriesToRetain)
             {
                 string path;
                 int index = directory.LastIndexOf(Path.AltDirectorySeparatorChar);
-                while(index > 0)
+                while (index > 0)
                 {
                     path = directory.Substring(0, index);
-                    if(!allDirectoriesToRetain.Contains(path)) allDirectoriesToRetain.Add(path);
+                    if (directories.Contains(path)) directories.Remove(path);
                     index = path.LastIndexOf(Path.AltDirectorySeparatorChar);
                 }
             }
+            
+            // for all directories to remove, their subdirectories will automatically be removed,
+            // so no need to duplicate the effort by including them in the filter-branch match
+            // TODO: Refactor this into directory helper and for better performance
+            bool keepGoing = true;
+            List<string> alreadyScanned = new List<string>();
+            var directoriesCopy = directories.ToList();
+            while (keepGoing)
+            {
+                keepGoing = false;
+                foreach (var dc in directoriesCopy)
+                {
+                    if (!DirectoriesToRetain.Any(dtr => dtr.StartsWith(dc)))
+                    {
+                        directories.RemoveAll(d => d.StartsWith(dc + Path.AltDirectorySeparatorChar));
+                        alreadyScanned.Add(dc);
+                        keepGoing = true;
+                        break;
+                    }
+                }
 
-            // get all directories for removal, and exclude git directories, as well as directories to retain
-            var directories = new List<string>(DirectoryHelper.GetDirectories(newRepository, "*", IncludeSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly));
-            directories.RemoveAll(d => d.StartsWith(".git"));   // always retain git directories
-            directories.RemoveAll(d => allDirectoriesToRetain.Contains(d));
+                if (keepGoing)
+                {
+                    directoriesCopy = directories.ToList();
+                    directoriesCopy.RemoveAll(d => alreadyScanned.Contains(d));
+                }
+            }
             
             return directories;
         }
